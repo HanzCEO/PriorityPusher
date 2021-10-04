@@ -6,6 +6,8 @@
 #include "utils.h"
 #include "todo.h"
 
+void show_help();
+
 int main(int argc, char *argv[]) {
 	/* Ignore command execution argument */
 	argc--;
@@ -13,10 +15,7 @@ int main(int argc, char *argv[]) {
 
 	/* Pre argument check */
 	if (argc == 0) { // Bruh
-		printf(	"USAGE:\n"
-			"prioritypusher <ACTION>\n\n"
-			"Current available actions:\n"
-			"new -- Create new todo\n");
+		show_help();
 		exit(1);
 	}
 
@@ -98,4 +97,16 @@ int main(int argc, char *argv[]) {
 	free(tmpsdt);
 
 	return 0;
+}
+
+void show_help() {
+	printf(
+		"USAGE:\n"
+		"prioritypusher <ACTION>\n\n"
+		"Current available actions:\n"
+		"new  -- Create new todo\n"
+		"list -- Display list of todos\n\n"
+		"Please refer to the GitHub repository for more documentation:\n"
+		"https://github.com/HanzCEO/PriorityPusher\n"
+	);
 }
