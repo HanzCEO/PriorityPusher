@@ -353,4 +353,7 @@ MigrationBackup/
 *~
 
 # Binary file
-prioritypusher
+prioritypusher*
+
+# Core Dumps
+vgcore*

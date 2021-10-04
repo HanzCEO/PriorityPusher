@@ -1,8 +1,21 @@
+BASEGRIND=valgrind -s --leak-check=full ./prioritypusher
+CCFLAGS=-DDEBUG -Wall -pedantic -g
+
 build:
-	$(CC) -Wall -pedantic -o prioritypusher utils.c todo.c main.c
+	$(CC) $(CCFLAGS) -o prioritypusher persistence.c utils.c todo.c main.c
 
 debug:
-	valgrind -s --leak-check=full ./prioritypusher
+	$(BASEGRIND)
+
+debug-new:
+	$(BASEGRIND) new < testnew.txt
+
+debug-list:
+	$(BASEGRIND) list
+
+test-all: debug-new
+	$(BASEGRIND) list
+	$(BASEGRIND) list -d
 
 clean:
 	rm -f `find -path '*~' | tr '\n' ' '`

@@ -1,4 +1,12 @@
+#ifndef TODO_H
+#define TODO_H
+
 #include <stddef.h> /* For size_t */
+
+#define SORT_OPTION_AMOUNT 6
+
+extern int sort_options[SORT_OPTION_AMOUNT];
+extern int sort_order;
 
 typedef struct todo_t {
 	char *name;
@@ -10,3 +18,6 @@ typedef struct todo_t {
 
 todo_t *todo_new(char *name, long long deadline, size_t priority);
 void todo_print(todo_t *todo);
+int todo_sort(const void *a, const void *b);
+
+#endif
