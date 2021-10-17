@@ -12,10 +12,12 @@ debug-new:
 
 debug-list:
 	$(BASEGRIND) list
-
-test-all: debug-new
-	$(BASEGRIND) list
 	$(BASEGRIND) list -d
+
+debug-top:
+	$(BASEGRIND) top
+
+test-all: debug-new debug-list debug-top
 
 clean:
 	rm -f `find -path '*~' | tr '\n' ' '`

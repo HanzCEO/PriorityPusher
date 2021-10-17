@@ -357,3 +357,7 @@ prioritypusher*
 
 # Core Dumps
 vgcore*
+
+# Save files
+*.dat
+*.out

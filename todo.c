@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/time.h>
 
 #include "utils.h"
@@ -46,14 +47,32 @@ void todo_print(todo_t *todo) {
 	printf("Priority\t: %ld\n", todo->priority);
 }
 
-int todo_sort(const void *av, const void *bv) {
-	const todo_t *a = (const todo_t*)av;
-	const todo_t *b = (const todo_t*)bv;
-	int sum = sum_int(sort_options, count(sort_options));
+#define cmpex(attr) (a->attr - b->attr)
 
-	if (sum == 1 && sort_options[0] == 1) {
-		return 0;
-	}
+int todo_sort_name(const void *av, const void *bv) {
+	todo_t *a = (todo_t*)av;
+	todo_t *b = (todo_t*)bv;
 
-	return 0;
+	return strcmp(*(char**)a->name, *(char**)b->name);
+}
+
+int todo_sort_timestamp(const void *av, const void *bv) {
+	todo_t *a = *(todo_t**)av;
+	todo_t *b = *(todo_t**)bv;
+
+	return cmpex(timestamp);
+}
+
+int todo_sort_deadline(const void *av, const void *bv) {
+	todo_t *a = *(todo_t**)av;
+	todo_t *b = *(todo_t**)bv;
+
+	return cmpex(deadline);
+}
+
+int todo_sort_priority(const void *av, const void *bv) {
+	todo_t *a = *(todo_t**)av;
+	todo_t *b = *(todo_t**)bv;
+
+	return cmpex(priority);
 }

@@ -30,8 +30,9 @@ int main(int argc, char *argv[]) {
 	if (todos == NULL) panic("Error initializing todo array.\n");
 
 	/* Argument parsing */
+	char *action = argv[0];
 	/* `new` todo command */
-	if (argc == 1 && strcmp(argv[0], "new") == 0) {
+	if (argc == 1 && strcmp(action, "new") == 0) {
 		printf("You are about to add new activity\n");
 		printf("Deadline format is \"DD/MM/YYYY HH:MM:SS\"\n");
 
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]) {
 
 		free(deadlineStr);
 		free(priorityStr);
-	} else if (strcmp(argv[0], "list") == 0) {
+	} else if (strcmp(action, "list") == 0 || strcmp(action, "top") == 0) {
 		for (size_t i = 0; i < argc; i++) {
 			char *arg = argv[i];
 
@@ -71,18 +72,34 @@ int main(int argc, char *argv[]) {
 				sort_order = 1;
 			} else if (strcmp(arg, "-a") == 0 || strcmp(arg, "--asc") == 0) {
 				sort_order = 0;
+			} else if (strcmp(arg, "-nm") == 0 || strcmp(arg, "--name") == 0) {
+				qsort(todos, todos_length, sizeof(todo_t*), todo_sort_name);
+			} else if (strcmp(arg, "-tm") == 0 || strcmp(arg, "--timestamp") == 0) {
+				qsort(todos, todos_length, sizeof(todo_t*), todo_sort_timestamp);
+			} else if (strcmp(arg, "-dl") == 0 || strcmp(arg, "--deadline") == 0) {
+				qsort(todos, todos_length, sizeof(todo_t*), todo_sort_deadline);
+			} else if (strcmp(arg, "-pr") == 0 || strcmp(arg, "--priority") == 0) {
+				qsort(todos, todos_length, sizeof(todo_t*), todo_sort_priority);
 			}
 		}
 
-		qsort(todos, todos_length, sizeof(todo_t), todo_sort);
-
-		if (sort_order == 0) {
-			for (size_t i = 0; i < todos_length; i++) {
-				todo_print(todos[i]);
-			}
+		if (strcmp(action, "top") == 0) {
+			char *trd = time_readable(todos[0]->deadline);
+			printf(
+				"[%ld] %s - %s",
+				todos[0]->priority, todos[0]->name,
+				trd
+			);
+			free(trd);
 		} else {
-			for (size_t i = todos_length - 1; i != -1; i--) {
-				todo_print(todos[i]);
+			if (sort_order == 0) {
+				for (size_t i = 0; i < todos_length; i++) {
+					todo_print(todos[i]);
+				}
+			} else {
+				for (size_t i = todos_length - 1; i != -1; i--) {
+					todo_print(todos[i]);
+				}
 			}
 		}
 	}
@@ -105,8 +122,14 @@ void show_help() {
 		"prioritypusher <ACTION>\n\n"
 		"Current available actions:\n"
 		"new  -- Create new todo\n"
-		"list -- Display list of todos\n\n"
-		"Please refer to the GitHub repository for more documentation:\n"
+		"list -- Display list of todos\n"
+		"top  -- Display the top todo\n"
+		"\nToDos Listing Options:\n"
+		"-nm --name\tSort by name\n"
+		"-tm --timestamp\tSort by todo creation timestamp\n"
+		"-dl --deadline\tSort by deadline\n"
+		"-pr --priority\tSort by priority\n"
+		"\nPlease refer to the GitHub repository for more documentation:\n"
 		"https://github.com/HanzCEO/PriorityPusher\n"
 	);
 }
