@@ -13,10 +13,13 @@ prioritypusher list [-d]
 
 ## Documentation
  - `new` Command
+ 
  Simply put you into an interactive form-like shell
  - `list` Command
+ 
  This action will list all of your ToDos. You can change the output on your will
  - `top` Command
+ 
  This action will only show you the top ToDo from sorted list of your ToDos
 
  Short Flag | Long Flag | Description

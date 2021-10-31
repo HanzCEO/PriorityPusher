@@ -3,10 +3,19 @@
 
 #include <stddef.h> /* For size_t */
 
-#define SORT_OPTION_AMOUNT 6
+extern int *sort_options;
+extern int sort_options_count;
 
-extern int sort_options[SORT_OPTION_AMOUNT];
-extern int sort_order;
+enum sort_option {
+	SO_NORMAL,
+	SO_NAME,
+	SO_TIME,
+	SO_DEAD,
+	SO_PRIORITY,
+	SO_DEADPRIO,
+	SOO_ASC,
+	SOO_DESC
+};
 
 typedef struct todo_t {
 	char *name;
@@ -18,9 +27,8 @@ typedef struct todo_t {
 
 todo_t *todo_new(char *name, long long deadline, size_t priority);
 void todo_print(todo_t *todo);
-int todo_sort_name(const void *a, const void *b);
-int todo_sort_timestamp(const void *a, const void *b);
-int todo_sort_deadline(const void *a, const void *b);
-int todo_sort_priority(const void *a, const void *b);
+void todo_swap(todo_t *a, todo_t *b);
+void todo_add_sort_option(enum sort_option opt);
+void todo_start_sort(todo_t **todos, size_t n);
 
 #endif

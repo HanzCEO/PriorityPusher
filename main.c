@@ -13,8 +13,8 @@ int main(int argc, char *argv[]) {
 	argc--;
 	argv++;
 
-	/* Pre argument check */
-	if (argc == 0) { // Bruh
+	/* Pre argument parsing check */
+	if (argc == 0) {
 		show_help();
 		exit(1);
 	}
@@ -28,6 +28,8 @@ int main(int argc, char *argv[]) {
 	todos = tmpsdt->todos;
 	todos_length = tmpsdt->length;
 	if (todos == NULL) panic("Error initializing todo array.\n");
+	sort_options = malloc(sizeof(int));
+	if (sort_options == NULL) panic("Error initializing sort_options array.\n");
 
 	/* Argument parsing */
 	char *action = argv[0];
@@ -62,27 +64,44 @@ int main(int argc, char *argv[]) {
 		save_detail_t savedetail = { todos, todos_length };
 		save_todos(savedetail);
 
+		/* Cleanup */
 		free(deadlineStr);
 		free(priorityStr);
 	} else if (strcmp(action, "list") == 0 || strcmp(action, "top") == 0) {
+		/* Push sorting options */
 		for (size_t i = 0; i < argc; i++) {
 			char *arg = argv[i];
 
+			/*
+				In the previous version, i depend on qsort which turns out
+				to be not suitable for the plan. Now, argument positioning
+				matters. If you put sorting order flag, the next flags
+				until the next sorting order flag will be affected by the
+				rule. If you want to get a todo that is important, you
+				can put `-pr -dl` to the command, test it out.
+			*/
+
 			if (strcmp(arg, "-d") == 0 || strcmp(arg, "--desc") == 0) {
-				sort_order = 1;
+				todo_add_sort_option(SOO_DESC);
 			} else if (strcmp(arg, "-a") == 0 || strcmp(arg, "--asc") == 0) {
-				sort_order = 0;
+				todo_add_sort_option(SOO_ASC);
+
+
 			} else if (strcmp(arg, "-nm") == 0 || strcmp(arg, "--name") == 0) {
-				qsort(todos, todos_length, sizeof(todo_t*), todo_sort_name);
+				todo_add_sort_option(SO_NAME);
 			} else if (strcmp(arg, "-tm") == 0 || strcmp(arg, "--timestamp") == 0) {
-				qsort(todos, todos_length, sizeof(todo_t*), todo_sort_timestamp);
+				todo_add_sort_option(SO_TIME);
 			} else if (strcmp(arg, "-dl") == 0 || strcmp(arg, "--deadline") == 0) {
-				qsort(todos, todos_length, sizeof(todo_t*), todo_sort_deadline);
+				todo_add_sort_option(SO_DEAD);
 			} else if (strcmp(arg, "-pr") == 0 || strcmp(arg, "--priority") == 0) {
-				qsort(todos, todos_length, sizeof(todo_t*), todo_sort_priority);
+				todo_add_sort_option(SO_PRIORITY);
 			}
 		}
 
+		/* Start the sorting algorithm */
+		todo_start_sort(todos, todos_length);
+
+		/* Print to user */
 		if (strcmp(action, "top") == 0) {
 			char *trd = time_readable(todos[0]->deadline);
 			printf(
@@ -92,19 +111,11 @@ int main(int argc, char *argv[]) {
 			);
 			free(trd);
 		} else {
-			if (sort_order == 0) {
-				for (size_t i = 0; i < todos_length; i++) {
-					todo_print(todos[i]);
-				}
-			} else {
-				for (size_t i = todos_length - 1; i != -1; i--) {
-					todo_print(todos[i]);
-				}
-			}
+			for (size_t i = 0; i < todos_length; i++) todo_print(todos[i]);
 		}
 	}
 
-	/* Free todos */
+	/* Throw out trashes */
 	for (size_t i = 0; i < todos_length; i++) {
 		free(todos[i]->name);
 		free(todos[i]);
@@ -112,6 +123,7 @@ int main(int argc, char *argv[]) {
 
 	free(todos);
 	free(tmpsdt);
+	free(sort_options);
 
 	return 0;
 }
@@ -128,7 +140,9 @@ void show_help() {
 		"-nm --name\tSort by name\n"
 		"-tm --timestamp\tSort by todo creation timestamp\n"
 		"-dl --deadline\tSort by deadline\n"
-		"-pr --priority\tSort by priority\n"
+		"-pr --priority\tSort by priority\n\n"
+		"-d  --descending\tSort the next flags with descending order rule\n"
+		"-a  --ascending\tSort the next flags with ascending order rule\n"
 		"\nPlease refer to the GitHub repository for more documentation:\n"
 		"https://github.com/HanzCEO/PriorityPusher\n"
 	);
