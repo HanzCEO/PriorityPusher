@@ -9,15 +9,20 @@ unsigned save_todos(save_detail_t detail) {
 	todo_t **todos = detail.todos;
 	size_t length = detail.length;
 	FILE *fp = NULL;
+	char *currentPath = getpgdfull();
 
-	fp = fopen(SAVE_FILE, "w");
+	strcat(currentPath, SAVE_FILE);
+	fp = fopen(currentPath, "w");
 	if (fp == NULL) {
 		panic("Error saving file.\n");
 	}
+	free(currentPath);
 	fputs("", fp); // Lol
 
 	for (size_t i = 0; i < length; i++) {
 		todo_t *todo = todos[i];
+		if (todo == NULL) continue;
+
 		fprintf(fp,
 				"%s\n%lld-%lld-%u-%lu\n",
 				todo->name,
@@ -38,6 +43,7 @@ save_detail_t *read_todos() {
 	save_detail_t *detail = NULL;
 	todo_t **todos = NULL;
 	FILE *fp = NULL;
+	char *currentPath = getpgdfull();
 
 	todos = malloc(sizeof(todo_t *));
 	if (todos == NULL) panic("Cannot allocate more space for todos array.\n");
@@ -45,16 +51,18 @@ save_detail_t *read_todos() {
 	detail = malloc(sizeof(save_detail_t));
 	if (detail == NULL) panic("Cannot allocate save_detail_t\n");
 
-	fp = fopen(SAVE_FILE, "r");
+	strcat(currentPath, SAVE_FILE);
+	fp = fopen(currentPath, "r");
 	if (errno == 2) {
 		save_detail_t savedet = { NULL, 0 };
 		save_todos(savedet);
-		fp = fopen(SAVE_FILE, "r"); // Re-open file
+		fp = fopen(currentPath, "r"); // Re-open file
 
 		if (fp == NULL) panic("Error reading save file.\n");
 	} else if (fp == NULL) {
 		panic("Error reading save file.\n");
 	}
+	free(currentPath);
 
 	while (1) {
 		int forceBreak = 0;
@@ -62,10 +70,11 @@ save_detail_t *read_todos() {
 		if (todo == NULL) panic("Cannot allocate more todo_t.\n");
 		todo->name = NULL;
 
-		if (feof(fp)) {
+		if (feof(fp) || fgetc(fp) == -1) {
 			free(todo);
 			break;
 		}
+		fseek(fp, -1, SEEK_CUR); /* Redeem last fgetc */
 
 		todos = realloc(todos, sizeof(todo_t *) * (i + 1 + (i == 0)));
 		if (todos == NULL) panic("Cannot allocate more space for todos array.\n");

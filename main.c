@@ -53,9 +53,8 @@ int main(int argc, char *argv[]) {
 
 		/* Finally, make the ToDo thingy */
 		todo_t *newTodo = todo_new(name, deadline, priority);
-		todo_print(newTodo);
+		todo_print(newTodo, ++todos_length);
 
-		todos_length++;
 		todos = realloc(todos, sizeof(todo_t *) * todos_length);
 		if (todos == NULL) panic("Cannot realloc more todos.\n");
 		todos[max(todos_length - 1, 0)] = newTodo;
@@ -111,12 +110,43 @@ int main(int argc, char *argv[]) {
 			);
 			free(trd);
 		} else {
-			for (size_t i = 0; i < todos_length; i++) todo_print(todos[i]);
+			for (size_t i = 0; i < todos_length; i++) todo_print(todos[i], i);
 		}
+	} else if (strcmp(action, "delete") == 0 || strcmp(action, "remove") == 0) {
+		if (argc != 2) panic("Argument incomplete.\n");
+		char *tmp;
+		long long index = strtoll(argv[1], &tmp, 10);
+		index--; /* Normalize number from user input to index-0 */
+
+		if (todos_length <= index) panic("ID non-existent.\n");
+
+		printf("Successfully removed \"%s\" from todo list.\n", todos[index]->name);
+		free(todos[index]);
+		todos[index] = NULL;
+
+		/* Save all todos */
+		save_detail_t savedetail = { todos, todos_length };
+		save_todos(savedetail);
+	} else if (strcmp(action, "finish") == 0 || strcmp(action, "done") == 0) {
+		if (argc != 2) panic("Argument incomplete.\n");
+		char *tmp;
+		long long index = strtoll(argv[1], &tmp, 10);
+		index--; /* Normalize number from user input to index-0 */
+
+		if (todos_length <= index) panic("ID non-existent.\n");
+		todos[index]->isDone = !(todos[index]->isDone);
+
+		/* Save all todos */
+		save_detail_t savedetail = { todos, todos_length };
+		save_todos(savedetail);
+
+		char *state = todos[index]->isDone ? "done" : "not done yet";
+		printf("\"%s\" set to %s.\n", todos[index]->name, state);
 	}
 
 	/* Throw out trashes */
 	for (size_t i = 0; i < todos_length; i++) {
+		if (todos[i] == NULL) continue;
 		free(todos[i]->name);
 		free(todos[i]);
 	}
@@ -128,14 +158,16 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-void show_help() {
+void show_help(char *name) {
 	printf(
 		"USAGE:\n"
 		"prioritypusher <ACTION>\n\n"
 		"Current available actions:\n"
-		"new  -- Create new todo\n"
-		"list -- Display list of todos\n"
-		"top  -- Display the top todo\n"
+		"new    -- Create new todo\n"
+		"list   -- Display list of todos\n"
+		"top    -- Display the top todo\n"
+		"remove -- Remove task from the list\n"
+		"finish -- Mark a task as finished\n"
 		"\nToDos Listing Options:\n"
 		"-nm --name\tSort by name\n"
 		"-tm --timestamp\tSort by todo creation timestamp\n"

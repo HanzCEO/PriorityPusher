@@ -21,6 +21,12 @@ prioritypusher list [-d]
  - `top` Command
  
  This action will only show you the top ToDo from sorted list of your ToDos
+ - `remove` Command
+
+ This action will remove task from the list
+ - `finish` Command
+
+ This action will mark task as finished
 
  Short Flag | Long Flag | Description
  ---------- | --------- | -----------

@@ -34,6 +34,24 @@ char *time_readable(time_t time) {
 	return ret;
 }
 
+char *getpgdfull() {
+	char *currentPath = malloc(sizeof(char) * FILENAME_MAX);
+	memset(currentPath, 0, FILENAME_MAX);
+	if (currentPath == NULL) panic("Error allocating currentPath variable.\n");
+
+	if (readlink("/proc/self/exe", currentPath, sizeof(char) * FILENAME_MAX) == -1) {
+		panic("Error getting current directory.\n");
+	}
+
+	size_t last = strlen(currentPath);
+	for (size_t i = last; i > 0; i--) {
+		if (currentPath[i] != '/') currentPath[i] = 0;
+		else break;
+	}
+
+	return currentPath;
+}
+
 long long time_from_readable(char *readable) {
 	int secs, mins, hours, days, months, year;
 	sscanf(readable, "%d/%d/%d %d:%d:%d", &days, &months, &year, &hours, &mins, &secs);

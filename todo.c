@@ -21,9 +21,9 @@ todo_t *todo_new(char *name, long long deadline, size_t priority) {
 	return todo;
 }
 
-void todo_print(todo_t *todo) {
+void todo_print(todo_t *todo, size_t id) {
 	char *tmp;
-	printf("== TODO =====================\n");
+	printf("== TODO == %ld\n", id + 1);
 	printf("Name\t\t: %s\n", todo->name);
 
 	tmp = time_readable(todo->timestamp);
