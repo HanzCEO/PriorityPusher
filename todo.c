@@ -45,21 +45,27 @@ void todo_swap(todo_t *a, todo_t *b) {
 }
 
 void todo_add_sort_option(enum sort_option opt) {
-	//sort_options_count++;
 	sort_options = realloc(sort_options, sizeof(int) * (++sort_options_count));
 	sort_options[sort_options_count - 1] = opt;
 }
 
+
+/*
+	I use bubble sort because it is one of the simplest,
+	even if it is very slow. Because, i could add custom
+	ordering rules when i know how the algorithm works.
+*/
 void todo_start_sort(todo_t **todos, size_t n) {
 	for (size_t i = 0; i < n-1; i++) {
 		for (size_t j = 0; j < n-i-1; j++) {
 			todo_t *a = todos[j];
 			todo_t *b = todos[j+1];
 
-			// Let me explain,
-			// mode = 1 = ASC
-			// mode = 0 = DESC
-			int mode = 1;
+			/*
+				Custom ordering rules, made by the user by
+				putting some command line flags.
+			*/
+			int isAscending = 1;
 
 			for (size_t c = 0; c < sort_options_count; c++) {
 				enum sort_option opt = sort_options[c];
@@ -68,37 +74,37 @@ void todo_start_sort(todo_t **todos, size_t n) {
 						// Nothing lol
 						break;
 					case SO_NAME:
-						if (mode && strcmp(a->name, b->name) > 0)
+						if (isAscending && strcmp(a->name, b->name) > 0)
 							todo_swap(todos[j], todos[j+1]);
-						if (!mode && strcmp(a->name, b->name) < 0)
+						if (!isAscending && strcmp(a->name, b->name) < 0)
 							todo_swap(todos[j+1], todos[j]);
 						break;
 					case SO_TIME:
-						if (mode && a->timestamp > b->timestamp)
+						if (isAscending && a->timestamp > b->timestamp)
 							todo_swap(todos[j], todos[j+1]);
-						if (!mode && a->timestamp < b->timestamp)
+						if (!isAscending && a->timestamp < b->timestamp)
 							todo_swap(todos[j+1], todos[j]);
 						break;
 					case SO_DEAD:
-						if (mode && a->deadline > b->deadline)
+						if (isAscending && a->deadline > b->deadline)
 							todo_swap(todos[j], todos[j+1]);
-						if (!mode && a->deadline < b->deadline)
+						if (!isAscending && a->deadline < b->deadline)
 							todo_swap(todos[j+1], todos[j]);
 						break;
 					case SO_PRIORITY:
-						if (mode && a->priority > b->priority)
+						if (isAscending && a->priority > b->priority)
 							todo_swap(todos[j], todos[j+1]);
-						if (!mode && a->priority < b->priority)
+						if (!isAscending && a->priority < b->priority)
 							todo_swap(todos[j+1], todos[j]);
 						break;
 					case SO_DEADPRIO:
 						// Coming soon
 						break;
 					case SOO_ASC:
-						mode = 1;
+						isAscending = 1;
 						break;
 					case SOO_DESC:
-						mode = 0;
+						isAscending = 0;
 						break;
 				}
 			}

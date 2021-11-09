@@ -28,6 +28,14 @@ int main(int argc, char *argv[]) {
 	todos = tmpsdt->todos;
 	todos_length = tmpsdt->length;
 	if (todos == NULL) panic("Error initializing todo array.\n");
+
+	/*
+		There is a global variable named `sort_options`
+		and it exists in header file as `int *`. I want to
+		make a dynamic integer array. It'll be pushed
+		with value as you type in order-altering command
+		line flags
+	*/
 	sort_options = malloc(sizeof(int));
 	if (sort_options == NULL) panic("Error initializing sort_options array.\n");
 
@@ -42,12 +50,11 @@ int main(int argc, char *argv[]) {
 		char *deadlineStr = input("Deadline\t: ");
 		char *priorityStr = input("Priority\t: ");
 
-		char *trashPtr;
 		/*
 			Convert priorityStr to long long
 			with radix of 10
 		*/
-		long long priority = strtoll(priorityStr, &trashPtr, 10);
+		long long priority = strtoll(priorityStr, NULL, 10);
 
 		long long deadline = time_from_readable(deadlineStr);
 
@@ -114,8 +121,8 @@ int main(int argc, char *argv[]) {
 		}
 	} else if (strcmp(action, "delete") == 0 || strcmp(action, "remove") == 0) {
 		if (argc != 2) panic("Argument incomplete.\n");
-		char *tmp;
-		long long index = strtoll(argv[1], &tmp, 10);
+		long long index = strtoll(argv[1], NULL, 10);
+		if (index <= 0) panic("ID non-existent.\n");
 		index--; /* Normalize number from user input to index-0 */
 
 		if (todos_length <= index) panic("ID non-existent.\n");
@@ -129,8 +136,8 @@ int main(int argc, char *argv[]) {
 		save_todos(savedetail);
 	} else if (strcmp(action, "finish") == 0 || strcmp(action, "done") == 0) {
 		if (argc != 2) panic("Argument incomplete.\n");
-		char *tmp;
-		long long index = strtoll(argv[1], &tmp, 10);
+		long long index = strtoll(argv[1], NULL, 10);
+		if (index <= 0) panic("ID non-existent.\n");
 		index--; /* Normalize number from user input to index-0 */
 
 		if (todos_length <= index) panic("ID non-existent.\n");
