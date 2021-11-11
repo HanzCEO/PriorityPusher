@@ -81,8 +81,9 @@ save_detail_t *read_todos() {
 
 		size_t nameLen = 0;
 		size_t nameBufLen = 10;
-		todo->name = malloc(sizeof(char) * 10);
-		memset(todo->name, 0, nameBufLen); // Automatic closure of null byte
+		todo->name = calloc(10, sizeof(char));
+		if (todo->name == NULL) panic("Failed to load a ToDo name from file.\n");
+
 		while (1) {
 			char ch = 0;
 

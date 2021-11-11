@@ -8,9 +8,8 @@
 #include "utils.h"
 
 char *input(char *display) {
-	char *buf = malloc(sizeof(char) * MAX_INPUT);
+	char *buf = calloc(MAX_INPUT, sizeof(char));
 	if (!buf) panic("Error allocating buffer.\n");
-	memset(buf, 0, MAX_INPUT);
 
 	printf("%s", display);
 	fgets(buf, MAX_INPUT, stdin);
@@ -23,9 +22,8 @@ char *input(char *display) {
 }
 
 char *time_readable(time_t time) {
-	char *ret = malloc(sizeof(char) * 64);
+	char *ret = calloc(64, sizeof(char));
 	if (ret == NULL) panic("Error allocating buffer.\n");
-	memset(ret, 0, 64);
 
 	struct tm *nowtm;
 	nowtm = localtime(&time);
@@ -35,8 +33,7 @@ char *time_readable(time_t time) {
 }
 
 char *getpgdfull() {
-	char *currentPath = malloc(sizeof(char) * FILENAME_MAX);
-	memset(currentPath, 0, FILENAME_MAX);
+	char *currentPath = calloc(FILENAME_MAX, sizeof(char));
 	if (currentPath == NULL) panic("Error allocating currentPath variable.\n");
 
 	if (readlink("/proc/self/exe", currentPath, sizeof(char) * FILENAME_MAX) == -1) {
